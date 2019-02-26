@@ -1,17 +1,26 @@
 package com.example.consumingsoapwebservices;
 
+import correio.wsdl.CServico;
 import correio.wsdl.CalcPrecoPrazo;
 import correio.wsdl.CalcPrecoPrazoResponse;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
+import org.springframework.ws.soap.client.core.SoapActionCallback;
+
 import java.math.BigDecimal;
+import java.util.List;
 
 public class CorreioClient extends WebServiceGatewaySupport {
 
-    private final String URL_CORREIOS = "http://ws.correios.com.br/calculador/CalcPrecoPrazo.asmx/CalcPrecoPrazo";
+    private final String URL_CORREIOS = "http://ws.correios.com.br/calculador/CalcPrecoPrazo.asmx";
 
     public CalcPrecoPrazoResponse calcula() {
-        return  (CalcPrecoPrazoResponse) getWebServiceTemplate()
-                    .marshalSendAndReceive(URL_CORREIOS, getRequestParams());
+        CalcPrecoPrazoResponse c =  (CalcPrecoPrazoResponse) getWebServiceTemplate()
+                    .marshalSendAndReceive(getRequestParams(), new SoapActionCallback("http://tempuri.org/CalcPrecoPrazo"));
+
+        List<CServico> cServico = c.getCalcPrecoPrazoResult().getServicos().getCServico();
+        cServico.forEach(s-> System.out.println(s.getCodigo()));
+        System.out.println(c.getCalcPrecoPrazoResult().getServicos().getCServico());
+        return c;
     }
 
     private CalcPrecoPrazo getRequestParams(){
